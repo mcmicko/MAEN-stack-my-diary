@@ -1,0 +1,210 @@
+<div class="row">
+  <div class="col">
+    <form (ngSubmit)="onInvite(f)" #f="ngForm">
+      <label for="email">E-Mail</label>
+      <div class="input-group">
+        <input
+          class="form-control"
+          type="email"
+          id="email"
+          name="email"
+          ngModel
+          required
+          email
+          #email="ngModel"
+          [ngClass]="{
+            'is-invalid':
+              error?.email || (email.invalid && (email.dirty || email.touched))
+          }"
+        />
+        <div class="input-group-append">
+          <button
+            class="btn btn-outline-secondary"
+            type="submit"
+            id="button-addon2"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+      <div
+        class="invalid-feedback"
+        *ngIf="email.invalid && (email.dirty || email.touched)"
+      >
+        Please enter correct email!
+      </div>
+      <div *ngIf="error?.email" class="invalid-feedback">
+        {{ error.email }}
+      </div>
+      <div class="alert alert-danger" *ngIf="error">
+        Failed to send mail!
+      </div>
+      <div class="alert alert-success" *ngIf="success">
+        Email has been sent!
+      </div>
+    </form>
+  </div>
+</div>
+<div class="row mt-3">
+  <div class="col">
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col" class="text-center align-middle">#</th>
+            <th scope="col" class="text-center align-middle">User</th>
+            <th scope="col" class="text-center align-middle">Details</th>
+            <th scope="col" class="text-center align-middle">Delete</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tr *ngFor="let user of userlist$ | async; let i = index">
+          <th scope="row" class="text-center align-middle">{{ i + 1 }}</th>
+          <td class="text-center align-middle">{{ user.name }}</td>
+          <td class="text-center align-middle">
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="userDetails(user)"
+              data-toggle="modal"
+              data-target="#UserDetailModal"
+            >
+              Details
+            </button>
+          </td>
+          <td class="text-center align-middle">
+            <button
+              type="button"
+              class="btn btn-danger"
+              (click)="onUserDelete(user)"
+              data-toggle="modal"
+              data-target="#deleteUserModal"
+              [disabled]="disableDelete(user)"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div
+  class="modal fade"
+  id="deleteUserModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="deleteUserLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteUserLabel">
+          Delete User
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Do you want to delete <i>{{ selectedUser?.name }}</i> and all stories
+          assigned to this user?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          data-dismiss="modal"
+          (click)="onCategoryDeleteSubmit()"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Details Modal-->
+
+<div
+  class="modal fade"
+  id="UserDetailModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="row">
+        <div class="col ml-3 mt-3">
+          <h5 class="text-capitalize">
+            {{ selectedUser?.name }}
+          </h5>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col ml-3 mt-n2">
+          <p>{{ selectedUser?.email }}</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col ml-3 mt-n3" *ngIf="selectedUser?.role === 2">
+          <small>User</small>
+        </div>
+        <div class="col ml-3 mt-n3" *ngIf="selectedUser?.role === 4">
+          <small>Admin</small>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <ul>
+          <li
+            *ngFor="let story of userStories; let i = index"
+            style="font-size: 2rem;"
+          >
+            {{ i + 1 }} - {{ story.title }}
+          </li>
+        </ul>
+
+        <div
+          *ngIf="userStories.length === 0"
+          style="color: red; font-size: 2rem;"
+        >
+          No Stories
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-primary mr-auto"
+            (click)="onRoleChange()"
+          >
+            Change Role
+          </button>
+          <small class="alert-danger" *ngIf="err">
+            Failed to change role!
+          </small>
+          <small class="alert-success" *ngIf="changed">
+            Role has been changed!
+          </small>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

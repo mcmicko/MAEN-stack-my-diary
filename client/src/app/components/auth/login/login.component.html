@@ -1,0 +1,73 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4">
+    <form (ngSubmit)="onLogin(f)" #f="ngForm">
+      <div class="logIn-title">
+        <h4>Log in to My Diary</h4>
+        <p>
+          or if you don't have an account, please
+          <a routerLink="/registration">register</a> here
+        </p>
+      </div>
+      <div class="form-group">
+        <label for="email">E-Mail</label>
+        <input
+          class="form-control"
+          type="email"
+          id="email"
+          name="email"
+          ngModel
+          required
+          email
+          #email="ngModel"
+          [ngClass]="{
+            'is-invalid':
+              error?.email || (email.invalid && (email.dirty || email.touched))
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="email.invalid && (email.dirty || email.touched)"
+        >
+          Please enter correct email!
+        </div>
+        <div *ngIf="error?.email" class="invalid-feedback">
+          {{ error.email }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          class="form-control"
+          type="password"
+          id="password"
+          name="password"
+          ngModel
+          required
+          #password="ngModel"
+          [ngClass]="{
+            'is-invalid':
+              error?.password ||
+              (password.invalid && (password.dirty || password.touched))
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="password.invalid && (password.dirty || password.touched)"
+        >
+          Please enter password!
+        </div>
+
+        <div *ngIf="error?.password" class="invalid-feedback">
+          {{ error.password }}
+        </div>
+      </div>
+      <div *ngIf="error?.verify" class="alert alert-danger">
+        {{ error.verify }}
+      </div>
+
+      <button class="btn btn-primary" type="submit" [disabled]="!f.valid">
+        Login
+      </button>
+    </form>
+  </div>
+</div>

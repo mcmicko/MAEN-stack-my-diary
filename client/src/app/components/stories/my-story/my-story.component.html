@@ -1,0 +1,282 @@
+<div class="welcomeText">
+  <h5>
+    Welcome
+    <h3>{{ authService.getUsername() }},</h3>
+  </h5>
+
+  <h6>
+    are you ready to create a
+    <a
+      href="#"
+      data-toggle="modal"
+      data-target="#saveStoryModal"
+      (click)="onStoryAdd()"
+      >new Story</a
+    >
+  </h6>
+</div>
+
+<div *ngFor="let story of userStory$ | async">
+  <div class="row">
+    <div class="col-md-12">
+      <hr />
+      <h3>Story title: {{ story.title }}</h3>
+      <div class="float-right">
+        <button
+          *ngIf="story.owner != null; else elseBlock"
+          type="button"
+          class="btn btn-outline-secondary mr-1"
+          (click)="onStoryEdit(story)"
+          data-toggle="modal"
+          data-target="#saveStoryModal"
+          [disabled]="true"
+        >
+          edit
+        </button>
+
+        <ng-template #elseBlock>
+          <button
+            type="button"
+            class="btn btn-outline-secondary mr-1"
+            (click)="onStoryEdit(story)"
+            data-toggle="modal"
+            data-target="#saveStoryModal"
+          >
+            edit
+          </button>
+        </ng-template>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="onStoryDelete(story)"
+          data-toggle="modal"
+          data-target="#deleteStoryModal"
+          style="margin-right: 0.5rem;"
+        >
+          delete
+        </button>
+      </div>
+      <div class="card border-success" *ngIf="story.owner != null">
+        <div class="card-body text-success">
+          <strong class="card-text">Saved story</strong>
+        </div>
+      </div>
+      <small class="author" *ngIf="story.owner != null">
+        Story created by:
+        {{ story.author.name }},</small
+      >
+      <small
+        class="privateStory"
+        style="color: rgb(153, 72, 88)"
+        *ngIf="story.privacy === true"
+        >Private story,</small
+      >
+      <small
+        >Story created on:
+        <time>{{ story.paublishDate | date: "dd.MM.yyyy" }}</time></small
+      >
+      <br />
+      <small style="margin-top: 20px">
+        avgRating: {{ avgRating(story) | number: "0.2-2" }}
+
+        <star-rating
+          value="{{ avgRating(story) | number: '0.2-2' }}"
+          checkedcolor="gold"
+          uncheckedcolor="gray"
+          size="24px"
+          readonly="true"
+        ></star-rating>
+      </small>
+      <div class="content">
+        <article>
+          <p>
+            {{ story.content }}
+          </p>
+        </article>
+      </div>
+      <button class="btn btn-success mr-2" (click)="toggle(story)">
+        View Comments
+      </button>
+      <div class="viewComments" *ngIf="story.show">
+        <div class="card card-body">
+          <div class="border" *ngFor="let comment of story.comments">
+            <small
+              ><strong>{{ comment.name }}</strong></small
+            >
+            <p>{{ comment.text }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<br />
+<br />
+
+<!-- Delete Modal -->
+<div
+  class="modal fade"
+  id="deleteStoryModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="deleteStoryModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteStoryModalLabel">Delete Story</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Do you want to delete <i>{{ selectedStory?.title }}</i
+          >?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-dismiss="modal"
+          (click)="onStoryDeleteSubmit()"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STORY -->
+<div
+  class="modal fade"
+  id="saveStoryModal"
+  tabindex="0"
+  role="dialog"
+  aria-labelledby="saveStoryModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="saveStoryModalLabel">Add Story</h5>
+
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form (ngSubmit)="onStorySaveSubmit(f, c)" #f="ngForm">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col" ngFormGroup>
+              <div class="form-group">
+                <label for="title">Title</label>
+
+                <input
+                  placeholder="Write the the title of the story here..."
+                  type="text"
+                  class="form-control"
+                  id="title"
+                  name="title"
+                  [(ngModel)]="selectedStory.title"
+                  required
+                  #title="ngModel"
+                  [ngClass]="{
+                    'is-invalid':
+                      error?.title ||
+                      (title.invalid && (title.dirty || title.touched))
+                  }"
+                />
+
+                <div
+                  class="invalid-feedback"
+                  *ngIf="title.invalid && (title.dirty || title.touched)"
+                >
+                  Please enter story title!
+                </div>
+                <div *ngIf="error?.title" class="invalid-feedback">
+                  {{ error.title }}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="title">Content</label>
+                <textarea
+                  placeholder="White the content of the story here..."
+                  name="content"
+                  id="content"
+                  class="form-control"
+                  cols="30"
+                  rows="10"
+                  [(ngModel)]="selectedStory.content"
+                  required
+                  #content="ngModel"
+                  [ngClass]="{
+                    'is-invalid':
+                      error?.content ||
+                      (content.invalid && (content.dirty || content.touched))
+                  }"
+                ></textarea>
+                <div
+                  class="invalid-feedback"
+                  *ngIf="content.invalid && (content.dirty || content.touched)"
+                >
+                  Please enter content
+                </div>
+                <!-- <div *ngIf="error?.content" class="invalid-feedback">{{error.content}}</div> -->
+              </div>
+
+              <div class="form-check">
+                <label id="label-privacy" for="privacy"
+                  >Is it a private Story</label
+                >
+                <input
+                  type="checkbox"
+                  name="privacy"
+                  id="privacy"
+                  #privacy="ngModel"
+                  [(ngModel)]="selectedStory.privacy"
+                />
+              </div>
+              <div class="hintText">
+                <p>
+                  Hint: If you choose your story to be public, only you will be
+                  able to read this story
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-dismiss="modal"
+            #c
+          >
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!f.valid">
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,125 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4">
+    <form (ngSubmit)="onRegister(f)" #f="ngForm">
+      <div class="registration-title">
+        <h4>Registration Form</h4>
+        <p>
+          if you already have an account, you can
+          <a routerLink="/login">log in</a>
+        </p>
+      </div>
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input
+          class="form-control"
+          type="text"
+          id="name"
+          name="name"
+          ngModel
+          required
+          #name="ngModel"
+          [ngClass]="{
+            'is-invalid':
+              error?.name || (name.invalid && (name.dirty || name.touched))
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="name.invalid && (name.dirty || name.touched)"
+        >
+          Please enter your name!
+        </div>
+        <div *ngIf="error?.name" class="invalid-feedback">{{ error.name }}</div>
+      </div>
+      <div class="form-group">
+        <label for="email">E-Mail</label>
+        <input
+          class="form-control"
+          type="email"
+          id="email"
+          name="email"
+          ngModel
+          required
+          email
+          #email="ngModel"
+          [ngClass]="{
+            'is-invalid':
+              error?.email || (email.invalid && (email.dirty || email.touched))
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="email.invalid && (email.dirty || email.touched)"
+        >
+          Please enter correct email!
+        </div>
+        <div *ngIf="error?.email" class="invalid-feedback">
+          {{ error.email }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          class="form-control"
+          type="password"
+          id="password"
+          name="password"
+          ngModel
+          required
+          minlength="6"
+          #password="ngModel"
+          [ngClass]="{
+            'is-invalid':
+              error?.password ||
+              (password.invalid && (password.dirty || password.touched))
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="password.invalid && (password.dirty || password.touched)"
+        >
+          Please enter password with at least 6 characters!
+        </div>
+        <div *ngIf="error?.password" class="invalid-feedback">
+          {{ error.password }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password2">Confirm Password</label>
+        <input
+          class="form-control"
+          type="password"
+          id="password2"
+          name="password2"
+          ngModel
+          required
+          #password2="ngModel"
+          [ngClass]="{
+            'is-invalid':
+              error?.password2 ||
+              (password2.invalid && (password2.dirty || password2.touched))
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="password2.invalid && (password2.dirty || password2.touched)"
+        >
+          Please enter conformation password!
+        </div>
+        <div *ngIf="error?.password2" class="invalid-feedback">
+          {{ error.password2 }}
+        </div>
+      </div>
+      <div class="alert alert-danger" *ngIf="error">
+        Failed to register user!
+      </div>
+      <div class="alert alert-success" *ngIf="success">
+        You have successfully registered! Please check your email to
+        verification account
+      </div>
+      <button class="btn btn-primary" type="submit" [disabled]="!f.valid">
+        Register
+      </button>
+    </form>
+  </div>
+</div>

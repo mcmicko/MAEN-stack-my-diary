@@ -1,0 +1,237 @@
+<div class="welcomeText">
+  <h5>
+    Welcome to the
+    <h3>Main Page</h3>
+  </h5>
+</div>
+<!-- search form -->
+<form
+  (ngSubmit)="onSearchTitle(title)"
+  #title="ngForm"
+  class="form-inline md-form form-sm mt-0"
+>
+  <div ngFormGroup>
+    <input
+      type="text"
+      class="form-control"
+      id="title"
+      name="title"
+      [(ngModel)]="selectStory.title"
+      #title="ngModel"
+      required
+    />
+    <input
+      type="submit"
+      value="search"
+      class="btn btn-primary mr-2"
+      [disabled]="!title.valid"
+    />
+  </div>
+</form>
+<h1 id="notfountstory" *ngIf="errorObject">Stories doesn't exist</h1>
+
+<div
+  *ngFor="let story of stories$ | async"
+  class="col-md-10 blogShort"
+  class="col-md-10 blogShort"
+  tabindex="1"
+>
+  <hr />
+
+  <div class="stories" [hidden]="story.privacy === true">
+    <h4>Story title: {{ story.title }}</h4>
+    <small>Story created by: {{ story.author.name }},</small>
+    <small
+      >Story created on:
+      <time>{{ story.paublishDate | date: "dd.MM.yyyy" }}</time></small
+    >
+    <br />
+    <div class="avgRating">
+      <small style="margin-top: 20px">
+        avgRating: {{ avgRating(story) | number: "0.2-2" }}
+
+        <star-rating
+          value="{{ avgRating(story) | number: '0.2-2' }}"
+          checkedcolor="gold"
+          uncheckedcolor="gray"
+          size="24px"
+          readonly="true"
+        ></star-rating>
+      </small>
+    </div>
+
+    <div class="rating">
+      <small>Your rate</small>
+      <star-rating
+        class="mt-n4"
+        value="{{ getRating(story) }}"
+        checkedcolor="gold"
+        uncheckedcolor="gray"
+        size="30px"
+        readonly="false"
+        (rate)="onRate($event, story)"
+      ></star-rating>
+    </div>
+
+    <article>
+      <p>
+        {{ story.content }}
+      </p>
+    </article>
+
+    <!-- add comment -->
+    <div class="float-left">
+      <button
+        type="button"
+        class="btn btn-primary mr-2"
+        data-toggle="modal"
+        data-target="#saveCommentModal"
+        (click)="onCommentAdd(story)"
+      >
+        Add Comments
+      </button>
+    </div>
+
+    <button class="btn btn-success mr-2" (click)="toggle(story)">
+      View Comments
+    </button>
+
+    <button
+      *ngIf="story.author._id != currentUser._id"
+      type="submit"
+      class="btn btn-outline-success"
+      (click)="onPublicStorySave(story)"
+    >
+      Save story
+    </button>
+
+    <div class="viewComments" *ngIf="story.show">
+      <div class="card card-body">
+        <div class="border" *ngFor="let comment of story.comments">
+          <small
+            ><strong>{{ comment.name }}</strong></small
+          >
+          <p>{{ comment.text }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br />
+<br />
+
+<!-- MODAL comment -->
+<div
+  class="modal fade"
+  id="saveCommentModal"
+  tabindex="0"
+  role="dialog"
+  aria-labelledby="saveCommentModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="saveCommentModalLabel">Add Comment</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form (ngSubmit)="onCommentSaveSubmit(f, c)" #f="ngForm">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col" ngFormGroup>
+              <!-- text -->
+              <div class="form-group">
+                <label for="text">Comment Content:</label>
+                <textarea
+                  placeholder="Write your comment..."
+                  name="text"
+                  id="text"
+                  class="form-control"
+                  cols="30"
+                  rows="10"
+                  [(ngModel)]="selectComment.text"
+                  required
+                  #text="ngModel"
+                  [ngClass]="{
+                    'is-invalid':
+                      error?.text ||
+                      (text.invalid && (text.dirty || text.touched))
+                  }"
+                ></textarea>
+                <div
+                  class="invalid-feedback"
+                  *ngIf="text.invalid && (text.dirty || text.touched)"
+                >
+                  Please enter text
+                </div>
+                <div *ngIf="error?.text" class="invalid-feedback">
+                  {{ error.text }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-dismiss="modal"
+            #c
+          >
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!f.valid">
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div
+  class="modal fade"
+  id="deleteBookModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="deleteBookModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteBookModalLabel">Delete Book</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Do you want to delete <i>{{ selectComment?.name }}</i> comment?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
